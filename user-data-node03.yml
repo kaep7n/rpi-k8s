@@ -1,0 +1,91 @@
+#cloud-config
+
+# apt:
+#   sources:
+#     kubernetes:
+#       source: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+#       key: |
+#         -----BEGIN PGP PUBLIC KEY BLOCK-----
+
+#         mQENBFrBaNsBCADrF18KCbsZlo4NjAvVecTBCnp6WcBQJ5oSh7+E98jX9YznUCrN
+#         rgmeCcCMUvTDRDxfTaDJybaHugfba43nqhkbNpJ47YXsIa+YL6eEE9emSmQtjrSW
+#         IiY+2YJYwsDgsgckF3duqkb02OdBQlh6IbHPoXB6H//b1PgZYsomB+841XW1LSJP
+#         YlYbIrWfwDfQvtkFQI90r6NknVTQlpqQh5GLNWNYqRNrGQPmsB+NrUYrkl1nUt1L
+#         RGu+rCe4bSaSmNbwKMQKkROE4kTiB72DPk7zH4Lm0uo0YFFWG4qsMIuqEihJ/9KN
+#         X8GYBr+tWgyLooLlsdK3l+4dVqd8cjkJM1ExABEBAAG0QEdvb2dsZSBDbG91ZCBQ
+#         YWNrYWdlcyBBdXRvbWF0aWMgU2lnbmluZyBLZXkgPGdjLXRlYW1AZ29vZ2xlLmNv
+#         bT6JAT4EEwECACgFAlrBaNsCGy8FCQWjmoAGCwkIBwMCBhUIAgkKCwQWAgMBAh4B
+#         AheAAAoJEGoDCyG6B/T78e8H/1WH2LN/nVNhm5TS1VYJG8B+IW8zS4BqyozxC9iJ
+#         AJqZIVHXl8g8a/Hus8RfXR7cnYHcg8sjSaJfQhqO9RbKnffiuQgGrqwQxuC2jBa6
+#         M/QKzejTeP0Mgi67pyrLJNWrFI71RhritQZmzTZ2PoWxfv6b+Tv5v0rPaG+ut1J4
+#         7pn+kYgtUaKdsJz1umi6HzK6AacDf0C0CksJdKG7MOWsZcB4xeOxJYuy6NuO6Kcd
+#         Ez8/XyEUjIuIOlhYTd0hH8E/SEBbXXft7/VBQC5wNq40izPi+6WFK/e1O42DIpzQ
+#         749ogYQ1eodexPNhLzekKR3XhGrNXJ95r5KO10VrsLFNd8I=
+#         =TKuP
+#         -----END PGP PUBLIC KEY BLOCK-----
+
+hostname: k8s-node03
+apt_preserve_sources_list: true
+manage_etc_hosts: true
+
+resize_rootfs: true
+growpart:
+    mode: auto
+    devices: ["/"]
+    ignore_growroot_disabled: false
+
+locale: "en_US.UTF-8"
+timezone: "Europe/Berlin"
+
+package_upgrade: true
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+packages:
+  - ntp
+  # - kubeadm
+
+write_files:
+  - content: |
+      # Inform the DHCP server of our hostname for DDNS.
+      hostname
+      # Use the hardware address of the interface for the Client ID.
+      clientid
+      # Persist interface configuration when dhcpcd exits.
+      persistent
+      # Rapid commit support.
+      # Safe to enable by default because it requires the equivalent option set
+      # on the server to actually work.
+      option rapid_commit
+      # A list of options to request from the DHCP server.
+      option domain_name_servers, domain_name, domain_search, host_name
+      option classless_static_routes
+      # Respect the network MTU. This is applied to DHCP routes.
+      option interface_mtu
+      # A ServerID is required by RFC2131.
+      require dhcp_server_identifier
+      # Generate SLAAC address using the Hardware Address of the interface
+      slaac private
+      # Example static IP configuration:
+      interface eth0
+      static ip_address=192.168.2.153/24
+      static routers=192.168.2.1
+      static domain_name_servers=192.168.2.1 8.8.8.8
+    path: /etc/dhcpcd.conf
+
+users:
+  - name: kaeptn
+    primary-group: users
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: users,docker,adm,dialout,audio,plugdev,netdev,video
+    ssh-import-id: None
+    lock_passwd: true
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDAkbVae6jGuL5cGuxQt1moXuicamCaeJ6RzwYCwnsKlzSMwdF1dJzrRrlIoOZYiI0JfmtVLqLl2AcNKRQYe+np3+Q2FSO6n5JsAIMJA6tQdVKywAJ2kawzJTFxMVa+UR0CHl2dahfUNe+mX4tfbYMJzUzgKldEh/I6Dll/pAhr7BYYbCzRwcaks+MZNjM9SqS3BrSNpyD57Eyg1ldcB4dDQjzzEA4Gy4+yAhiNfeAGovv7CIamh+VtoJKoIaCC+dF11cwMWD3K49NEG6R+CmlqNCZzxRaw37NTijYcTddptUjgNxtzYVXbaZQH1YKbw91DnN/VKdHNsr0aI8qyidjiMPLGdnlByHI88PPu1BD3pjH5JYiqlwn1E2ojACmL1BZE4hfvQX5bKkcNiguNtUjWFHCaRBKkV+PbJMNJ+BnoH55n/H1RvmgKa+wnHlTM8LEyj71IVM3DT41hsHHYl26YvB5Rci2p5qUIsPgUSiMGlWxHZJ/wQ6brwfcwzl8Ab95FMz+LZE0g3F2OoWePbagjLromfd72YYeKPmaMLDVOsNymUBFZ5BVh5WMyR7Py8ehhjxBEvrfhVM6QQOBU5wPl5VLgwTBtHjiBgOCV64KOUG4SqRjtf7uVI7M6esRJv6gU8tfau6+d11mIFccs6oyQRwcAJkzHdcbGwDJX/t68jQ==
+
+runcmd:
+  - [ systemctl, restart, avahi-daemon ]
+  # - curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+  # - echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
+  # - apt-get update && apt-get install -y kubeadm

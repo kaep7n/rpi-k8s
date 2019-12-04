@@ -1,0 +1,7 @@
+flash --hostname k8s-master --userdata ./user-data-master.yml -d /dev/sdb hypriotos-rpi-v1.11.4.img.zip
+
+flash --hostname k8s-node01 --userdata ./user-data-node01.yml -d /dev/sdb hypriotos-rpi-v1.11.4.img.zip
+
+flash --hostname k8s-node02 --userdata ./user-data-node02.yml -d /dev/sdb hypriotos-rpi-v1.11.4.img.zip
+
+flash --hostname k8s-node03 --userdata ./user-data-node03.yml -d /dev/sdb hypriotos-rpi-v1.11.4.img.zip
