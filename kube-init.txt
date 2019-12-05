@@ -1,0 +1,59 @@
+##### install kubeadm
+
+sudo su -
+
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
+
+apt-get update && apt-get install -y kubeadm
+
+#####
+
+##### prepare docker
+
+https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
+
+# Install Docker CE
+## Set up the repository:
+### Install packages to allow apt to use a repository over HTTPS
+apt-get update && apt-get install apt-transport-https ca-certificates curl software-properties-common
+
+### Add Docker’s official GPG key
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+### Add Docker apt repository.
+add-apt-repository \
+  "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) \
+  stable"
+
+## Install Docker CE.
+apt-get update && apt-get install docker-ce=18.06.2~ce~3-0~ubuntu
+
+# Setup daemon.
+cat > /etc/docker/daemon.json <<EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+
+mkdir -p /etc/systemd/system/docker.service.d
+
+# Restart docker.
+systemctl daemon-reload
+systemctl restart docker
+
+#####
+
+##### init cluster
+
+sudo kubeadm init --token-ttl=0
+
+kubeadm join 192.168.2.150:6443 --token blvtyo.mhghe3bd41ocjg0q \
+    --discovery-token-ca-cert-hash sha256:699a195d1359ef47536db3708cc4959ea3c21778cf7c966252489c9c89f1ec46
+
