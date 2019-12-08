@@ -54,6 +54,8 @@ systemctl restart docker
 
 sudo kubeadm init --token-ttl=0
 
-kubeadm join 192.168.2.150:6443 --token blvtyo.mhghe3bd41ocjg0q \
-    --discovery-token-ca-cert-hash sha256:699a195d1359ef47536db3708cc4959ea3c21778cf7c966252489c9c89f1ec46
+kubeadm join 192.168.2.150:6443 --token 79l4dd.fhv508z8i5o7mus1 \
+    --discovery-token-ca-cert-hash sha256:816e1e690ce4f552f3b7d8be5937dd408ffa94afe82a16b80a9815f2c3443d65 
+
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 
