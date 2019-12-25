@@ -16,3 +16,12 @@ WantedBy=multi-user.target
 sudo systemctl daemon-reload \
  && sudo systemctl enable nodeexporter \
  && sudo systemctl start nodeexporter
+
+####
+debug services
+
+ kubectl run hostnames --image=k8s.gcr.io/serve_hostname-arm:v1.6 \
+                        --labels=app=hostnames \
+                        --port=9376 \
+                        --replicas=3 \
+                        --namespace=monitoring

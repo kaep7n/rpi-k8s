@@ -23,12 +23,13 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 
 ### Add Docker apt repository.
 add-apt-repository \
-  "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+  "deb [arch=armv7] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) \
   stable"
 
 ## Install Docker CE.
 apt-get update && apt-get install docker-ce=18.06.2~ce~3-0~ubuntu
+apt-get install docker-ce=18.06.1~ce~3-0~raspbian
 
 # Setup daemon.
 cat > /etc/docker/daemon.json <<EOF
@@ -53,9 +54,35 @@ systemctl restart docker
 ##### init cluster
 
 sudo kubeadm init --token-ttl=0
+for flannel add --pod-network-cidr=10.244.0.0/16
 
-kubeadm join 192.168.2.150:6443 --token 79l4dd.fhv508z8i5o7mus1 \
-    --discovery-token-ca-cert-hash sha256:816e1e690ce4f552f3b7d8be5937dd408ffa94afe82a16b80a9815f2c3443d65 
+### flannel
 
-kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+or flannel to work correctly, you must pass --pod-network-cidr=10.244.0.0/16 to kubeadm init.
 
+Set /proc/sys/net/bridge/bridge-nf-call-iptables to 1 by running sysctl net.bridge.bridge-nf-call-iptables=1 to pass bridged IPv4 traffic to iptables’ chains. This is a requirement for some CNI plugins to work, for more information please see here.
+
+Make sure that your firewall rules allow UDP ports 8285 and 8472 traffic for all hosts participating in the overlay network. see here .
+
+Note that flannel works on amd64, arm, arm64, ppc64le and s390x under Linux. Windows (amd64) is claimed as supported in v0.11.0 but the usage is undocumented.
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/2140ac876ef134e0ed5af15c65e414cf26827915/Documentation/kube-flannel.yml
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+### join
+
+kubeadm join 192.168.2.150:6443 --token mcvhnt.8t6aei06h28eygeg \
+    --discovery-token-ca-cert-hash sha256:0680858a1e8e405a660c3838c31055626f8a8c718fe5bbb7dd72aaede5d81f58
+
+### reset
+
+sudo kubeadm reset
+
+sudo iptables -P INPUT ACCEPT
+sudo iptables -P OUTPUT ACCEPT
+sudo iptables -P FORWARD ACCEPT
+
+sudo iptables -F
