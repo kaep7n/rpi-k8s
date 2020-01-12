@@ -13,6 +13,9 @@ spec:
       name: grafana
       labels:
         app: grafana
+      annotations:
+         prometheus.io/scrape: "true"
+         prometheus.io/port: "9100"
     spec:
       containers:
       - name: grafana

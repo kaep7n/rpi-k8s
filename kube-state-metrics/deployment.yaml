@@ -16,6 +16,9 @@ spec:
       labels:
         app.kubernetes.io/name: kube-state-metrics
         app.kubernetes.io/version: v1.9.0
+      annotations:
+         prometheus.io/scrape: "true"
+         prometheus.io/port: "9100"
     spec:
       containers:
       - image: gcr.io/google-containers/kube-state-metrics-arm:v1.9.0
