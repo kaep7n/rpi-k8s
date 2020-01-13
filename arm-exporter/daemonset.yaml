@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: arm-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: arm-exporter
+  template:
+    metadata:
+      name: arm-exporter
+      labels:
+        app: arm-exporter
+      annotations:
+         prometheus.io/scrape: "true"
+         prometheus.io/port: "9243"
+    spec:
+      containers:
+      - name: arm-exporter
+        image: carlosedp/arm_exporter:latest
+        ports:
+        - containerPort: 9243
+          hostPort: 9243
+          name: scrape
+        resources:
+          requests:
+            memory: 30Mi
+            cpu: 100m
+          limits:
+            memory: 50Mi
+            cpu: 200m
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
