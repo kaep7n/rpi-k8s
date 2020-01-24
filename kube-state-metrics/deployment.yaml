@@ -37,6 +37,13 @@ spec:
             port: 8081
           initialDelaySeconds: 5
           timeoutSeconds: 5
+        resources:
+          requests:
+            memory: 50Mi
+            cpu: 100m
+          limits:
+            memory: 100Mi
+            cpu: 200m
       nodeSelector:
         kubernetes.io/os: linux
       serviceAccountName: kube-state-metrics
