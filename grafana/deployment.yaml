@@ -27,13 +27,21 @@ spec:
           limits:
             memory: 400Mi
             cpu: 400m
-          
         volumeMounts:
           - mountPath: /var/lib/grafana
             name: grafana-storage
           - mountPath: /etc/grafana/provisioning/datasources
             name: grafana-datasources
             readOnly: false
+          - mountPath: /etc/grafana/provisioning
+            name: grafana-dashboards
+            readOnly: false
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 3
+          periodSeconds: 3
       volumes:
         - name: grafana-storage
           emptyDir: {}
@@ -41,3 +49,7 @@ spec:
           configMap:
               defaultMode: 420
               name: grafana-datasources
+        - name: grafana-dashboards
+          configMap:
+              defaultMode: 420
+              name: grafana-dashboards
