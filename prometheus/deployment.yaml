@@ -46,4 +46,5 @@ spec:
             name: prometheus
   
         - name: prometheus-storage-volume
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: prometheus
