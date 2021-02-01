@@ -1,24 +1,9 @@
 #cloud-config
+# vim: syntax=yaml
+#
 
 hostname: k8s-node01
-apt_preserve_sources_list: true
 manage_etc_hosts: true
-
-resize_rootfs: true
-growpart:
-    mode: auto
-    devices: ["/"]
-    ignore_growroot_disabled: false
-
-locale: "en_US.UTF-8"
-timezone: "Europe/Berlin"
-
-package_upgrade: true
-package_update: true
-package_upgrade: true
-package_reboot_if_required: true
-packages:
-  - ntp
 
 users:
   - name: kaeptn
@@ -31,5 +16,31 @@ users:
     ssh-authorized-keys:
       - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDAkbVae6jGuL5cGuxQt1moXuicamCaeJ6RzwYCwnsKlzSMwdF1dJzrRrlIoOZYiI0JfmtVLqLl2AcNKRQYe+np3+Q2FSO6n5JsAIMJA6tQdVKywAJ2kawzJTFxMVa+UR0CHl2dahfUNe+mX4tfbYMJzUzgKldEh/I6Dll/pAhr7BYYbCzRwcaks+MZNjM9SqS3BrSNpyD57Eyg1ldcB4dDQjzzEA4Gy4+yAhiNfeAGovv7CIamh+VtoJKoIaCC+dF11cwMWD3K49NEG6R+CmlqNCZzxRaw37NTijYcTddptUjgNxtzYVXbaZQH1YKbw91DnN/VKdHNsr0aI8qyidjiMPLGdnlByHI88PPu1BD3pjH5JYiqlwn1E2ojACmL1BZE4hfvQX5bKkcNiguNtUjWFHCaRBKkV+PbJMNJ+BnoH55n/H1RvmgKa+wnHlTM8LEyj71IVM3DT41hsHHYl26YvB5Rci2p5qUIsPgUSiMGlWxHZJ/wQ6brwfcwzl8Ab95FMz+LZE0g3F2OoWePbagjLromfd72YYeKPmaMLDVOsNymUBFZ5BVh5WMyR7Py8ehhjxBEvrfhVM6QQOBU5wPl5VLgwTBtHjiBgOCV64KOUG4SqRjtf7uVI7M6esRJv6gU8tfau6+d11mIFccs6oyQRwcAJkzHdcbGwDJX/t68jQ==
 
+locale: "en_US.UTF-8"
+timezone: "Europe/Berlin"
+
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+package_upgrade: false
+
+write_files:
+  - path: /etc/network/interfaces.d/eth0
+    content: |
+      auto eth0
+      allow-hotplug eth0
+      iface eth0 inet static
+      address 192.168.2.151
+      netmask 255.255.255.0
+      gateway 192.168.2.1
+      dns-nameservers 192.168.2.1 8.8.8.8
+      dns-search k8s-master
+
 runcmd:
-  - [ systemctl, restart, avahi-daemon ]
+  - 'systemctl restart avahi-daemon'
+  - 'ifup eth0'
+
+power_state:
+  mode: reboot
+  timeout: 30
+  condition: True
