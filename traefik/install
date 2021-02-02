@@ -1,0 +1,5 @@
+helm repo add traefik https://helm.traefik.io/traefi
+helm repo update
+
+kubectl create namespace traefik
+helm install --namespace=traefik --set="additionalArguments={--log.level=DEBUG}" --set service.type=NodePort --set service.externalIPs[0]=192.168.2.150 traefik traefik/traefik
