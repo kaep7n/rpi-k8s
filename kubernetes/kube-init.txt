@@ -53,7 +53,7 @@ systemctl restart docker
 
 ##### init cluster
 
-sudo kubeadm init --token-ttl=0
+sudo kubeadm init --token-ttl=0 --pod-network-cidr=10.244.0.0/16
 for flannel add --pod-network-cidr=10.244.0.0/16
 
 ### flannel
@@ -66,7 +66,7 @@ Make sure that your firewall rules allow UDP ports 8285 and 8472 traffic for all
 
 Note that flannel works on amd64, arm, arm64, ppc64le and s390x under Linux. Windows (amd64) is claimed as supported in v0.11.0 but the usage is undocumented.
 
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/2140ac876ef134e0ed5af15c65e414cf26827915/Documentation/kube-flannel.yml
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -86,3 +86,6 @@ sudo iptables -P OUTPUT ACCEPT
 sudo iptables -P FORWARD ACCEPT
 
 sudo iptables -F
+
+kubeadm join 192.168.2.150:6443 --token qo77ad.1hrl38rop3o84r4p \
+    --discovery-token-ca-cert-hash sha256:fbd84fddea9d45d9f978a667a5446e18df04ec1c206a47a334f04dd31dd22433
