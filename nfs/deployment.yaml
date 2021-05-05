@@ -21,7 +21,7 @@ spec:
       serviceAccountName: nfs-client-provisioner
       containers:
         - name: nfs-client-provisioner
-          image: yonatankahana/nfs-subdir-external-provisioner:armfix2
+          image: k8s.gcr.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2
           volumeMounts:
             - name: nfs-client-root
               mountPath: /persistentvolumes
@@ -31,7 +31,7 @@ spec:
             - name: NFS_SERVER
               value: 192.168.2.150
             - name: NFS_PATH
-              value: /media/nfs
+              value: /mnt/nfs
           resources:
             requests:
               memory: 50Mi
@@ -43,4 +43,4 @@ spec:
         - name: nfs-client-root
           nfs:
             server: 192.168.2.150
-            path: /media/nfs
+            path: /mnt/nfs
