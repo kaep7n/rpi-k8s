@@ -1,5 +1,7 @@
 ##### install kubeadm
 
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
+
 sudo su -
 
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
@@ -13,26 +15,9 @@ apt-get update && apt-get install -y kubeadm
 
 https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
 
-# Install Docker CE
-## Set up the repository:
-### Install packages to allow apt to use a repository over HTTPS
-apt-get update && apt-get install apt-transport-https ca-certificates curl software-properties-common
-
-### Add Docker’s official GPG key
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-
-### Add Docker apt repository.
-add-apt-repository \
-  "deb [arch=armv7] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) \
-  stable"
-
-## Install Docker CE.
-apt-get update && apt-get install docker-ce=18.06.2~ce~3-0~ubuntu
-apt-get install docker-ce=18.06.1~ce~3-0~raspbian
-
 # Setup daemon.
-cat > /etc/docker/daemon.json <<EOF
+sudo mkdir /etc/docker
+cat <<EOF | sudo tee /etc/docker/daemon.json
 {
   "exec-opts": ["native.cgroupdriver=systemd"],
   "log-driver": "json-file",
@@ -43,18 +28,20 @@ cat > /etc/docker/daemon.json <<EOF
 }
 EOF
 
-mkdir -p /etc/systemd/system/docker.service.d
-
 # Restart docker.
-systemctl daemon-reload
-systemctl restart docker
+sudo systemctl enable docker
+sudo systemctl daemon-reload
+sudo systemctl restart docker
 
 #####
 
 ##### init cluster
 
 sudo kubeadm init --token-ttl=0 --pod-network-cidr=10.244.0.0/16
-for flannel add --pod-network-cidr=10.244.0.0/16
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 ### flannel
 
@@ -68,14 +55,12 @@ Note that flannel works on amd64, arm, arm64, ppc64le and s390x under Linux. Win
 
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
 
 ### join
 
-kubeadm join 192.168.2.150:6443 --token mcvhnt.8t6aei06h28eygeg \
-    --discovery-token-ca-cert-hash sha256:0680858a1e8e405a660c3838c31055626f8a8c718fe5bbb7dd72aaede5d81f58
+sudo kubeadm join 192.168.2.150:6443 --token wzr5w1.vybji14gfkmjveon \
+        --discovery-token-ca-cert-hash sha256:e045442c65f88dec2fce8b765360e88f114299ddbed6caff6da96d29defda86c
 
 ### reset
 
