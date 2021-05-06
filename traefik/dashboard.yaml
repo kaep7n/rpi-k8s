@@ -7,8 +7,10 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`dashboard.traefik`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+    - match: Host(`traefik.kaeptn.dev`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
       kind: Rule
       services:
         - name: api@internal
           kind: TraefikService
+  tls:
+    secretName: tls-star-kaeptn-dev

@@ -7,14 +7,17 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
+  tls:
+    - hosts: []
+      secretName: tls-star-kaeptn-dev
   rules:
-  - host: dashboard.kubernetes
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: kubernetes-dashboard
-            port:
-              number: 80
+    - host: dashboard.kaeptn.dev
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: kubernetes-dashboard
+              port:
+                number: 80
