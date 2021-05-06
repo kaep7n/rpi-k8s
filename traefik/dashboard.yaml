@@ -5,7 +5,7 @@ metadata:
   name: dashboard
 spec:
   entryPoints:
-    - web
+    - websecure
   routes:
     - match: Host(`traefik.kaeptn.dev`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
       kind: Rule
