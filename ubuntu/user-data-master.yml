@@ -32,3 +32,4 @@ power_state:
   mode: reboot
   timeout: 30
   condition: True
+  
