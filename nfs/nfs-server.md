@@ -5,7 +5,7 @@ https://pimylifeup.com/raspberry-pi-mount-usb-drive/
 
 ```
 sudo blkid /dev/sda1
-/dev/sda1: UUID="1819-3F9A" TYPE="exfat" PARTLABEL="Microsoft basic data" PARTUUID="aac4ca43-325e-40c2-bc5b-db2f567a2277"
+0B568FF27D5CC25F
 
 sudo apt install exfat-fuse
 sudo apt install exfat-utils
@@ -14,7 +14,7 @@ sudo mkdir -p /mnt/nfs
 sudo chown -R kaeptn:users /mnt/nfs
 
 sudo nano /etc/fstab
-UUID=1819-3F9A /mnt/nfs exfat defaults,auto,users,rw,nofail,noatime 0 0
+UUID=0B568FF27D5CC25F /mnt/nfs ntfs defaults,auto,users,rw,nofail,noatime 0 0
 
 sudo umount /dev/sda1
 sudo mount -a
